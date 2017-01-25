@@ -14,7 +14,7 @@ body {
 
 #left-column {
     float: left;
-    width: 30%;
+    width: 40%;
     font-size: 26px;
     padding: 30px;
     box-sizing: border-box;
@@ -25,7 +25,7 @@ body {
 }
 
 #right-column {
-    width: 70%;
+    width: 60%;
     float: left;
     box-sizing: border-box;
 }
@@ -44,6 +44,35 @@ body {
 
 .clear {
     clear: both;
+}
+
+.questionPart input {
+    width: 100%;
+    font-size: 18px;
+    height: 30px;
+}
+
+.questionPart .nextBtn {
+    margin-top: 20px;
+}
+
+.title {
+    display: block;
+    color: #71b471;
+    margin-bottom: 15px;
+}
+
+.instruction {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.activityIndicator {
+    margin: auto auto;
+    width: 200px;
+    height: 200px;
+    font-size: 18px;
 }
 
 .button {

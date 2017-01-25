@@ -15,12 +15,18 @@ object HitService {
     t match {
       case SALIENCY_DETECTION => 0.05
       case OBJECT_DESCRIPTION => 0.05
+      case _ => 0.05
     }
   }
 
-  private def submitHitForExecutionPoint(pointId: Int, t: Task, n: Int, reward: Double, lifetime: Long) {
-    val baseUrl = s"${Constants.EXTERNAL_QUESTION_BASE_URL}/external/hit/${t.name}"
-    val url = formatURLWithQueryParams(baseUrl, "epId" -> pointId)
+  private def submitHitForExecutionPoint(ep: ExecutionPoint, t: Task, n: Int, reward: Double, lifetime: Long) {
+    val baseUrl = s"${Constants.EXTERNAL_QUESTION_BASE_URL}/${t.id}"
+    val url = formatURLWithQueryParams(baseUrl,
+      "epId" -> ep.executionPointId,
+      "lat" -> ep.lat,
+      "long" -> ep.long,
+      "bearing" -> ep.bearing
+    )
 
     val questionXML =
       <ExternalQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd">
@@ -30,14 +36,14 @@ object HitService {
     val question = questionXML.toString()
     val hit = turkClient.createHIT(null, t.title, t.description, t.keywords, question, reward, t.assingmentDuration, t.autoApprovalDelay, lifetime, n, null, t.qualificationRequirements, null)
 
-    println(s"Created ${t.name} hit for execution point $pointId. (${hit.getHITId})")
+    println(s"Created ${t.name} hit for execution point ${ep.executionPointId}. (${hit.getHITId})")
     // For now, don't bother adding this hit to DB
   }
 
-  def processExecutionPoints(epIds: List[Int]): Unit = {
-    println(s"Processing ${epIds.length} execution points...")
-    epIds.par.foreach(epId => {
-      submitHitForExecutionPoint(epId, SALIENCY_DETECTION, Constants.INITIAL_ASSIGNMENT_COUNT, getHitReward(SALIENCY_DETECTION), Constants.INITIAL_HIT_LIFETIME)
+  def processExecutionPoints(eps: Seq[ExecutionPoint]): Unit = {
+    println(s"Processing ${eps.length} execution points...")
+    eps.par.foreach(ep => {
+      submitHitForExecutionPoint(ep, SALIENCY_DETECTION, Constants.INITIAL_ASSIGNMENT_COUNT, getHitReward(SALIENCY_DETECTION), Constants.INITIAL_HIT_LIFETIME)
     })
     println("Processing complete")
   }

@@ -4,8 +4,11 @@ import javax.servlet.ServletContext
 
 import _root_.akka.actor.{ActorSystem, Props}
 import io.torchbearer.ServiceCore.TorchbearerDB
-import io.torchbearer.turkservice.servlets.{ExternalServlet, InternalServlet}
+import io.torchbearer.turkservice.servlets.{InternalServlet, QuestionServlet}
+import io.torchbearer.turkservice.resources.HitResource
+import io.torchbearer.turkservice.tasks.ProcessingPollingTask
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class ScalatraBootstrap extends LifeCycle {
@@ -15,11 +18,16 @@ class ScalatraBootstrap extends LifeCycle {
 
   override def init(context: ServletContext) {
     // Start REST servers
-    context.mount(new ExternalServlet, "/external/*")
+    context.mount(new QuestionServlet(system), "/question/*")
+    context.mount(new HitResource(system), "/hits/*")
+
     context.mount(new InternalServlet(system), "/internal/*")
 
     // Start continuous tasks
-    system.scheduler.schedule(30.seconds, 30.seconds, PollingTask)
+    //system.scheduler.schedule(30.seconds, 30.seconds, new PollingTask(system))
+    if (sys.env.getOrElse("POLL_PROCESS_QUEUE", "true").toBoolean ) {
+      system.scheduler.scheduleOnce(30.seconds, new ProcessingPollingTask(system))
+    }
 
     // Initialize core services
     TorchbearerDB.init()

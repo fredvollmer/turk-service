@@ -13,8 +13,8 @@ $(document).ready(function() {
 
 var handleSelectionChanged = function(img, selection) {
     var form = $('.turkForm');
-    form.find("input[name='x1']").val(selection.x1);
-    form.find("input[name='x2']").val(selection.x2);
-    form.find("input[name='y1']").val(selection.y1);
-    form.find("input[name='y2']").val(selection.y2);
+    form.find("input[name='x1']").val(selection.x1 / img.clientWidth);
+    form.find("input[name='x2']").val(selection.x2 / img.clientWidth);
+    form.find("input[name='y1']").val(selection.y1 / img.clientHeight);
+    form.find("input[name='y2']").val(selection.y2 / img.clientHeight);
 };

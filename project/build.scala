@@ -8,6 +8,9 @@ import ScalateKeys._
 import sbtassembly.AssemblyPlugin._
 import sbtassembly.AssemblyKeys._
 import sbtassembly.{MergeStrategy, PathList}
+import com.earldouglas.xwp.JettyPlugin
+import com.earldouglas.xwp.JettyPlugin.autoImport._
+import com.earldouglas.xwp.ContainerPlugin.autoImport._
 
 object TurkServiceBuild extends Build {
   val Organization = "io.torchbearer"
@@ -50,7 +53,7 @@ object TurkServiceBuild extends Build {
       resolvers += Classpaths.typesafeReleases,
       resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
       resolvers += "Akka Repo" at "http://repo.akka.io/repository",
-        libraryDependencies ++= Seq(
+      libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-library" % ScalaVersion,
         "org.scala-lang" % "scala-reflect" % ScalaVersion,
         "org.scala-lang" % "scala-compiler" % ScalaVersion,
@@ -69,6 +72,7 @@ object TurkServiceBuild extends Build {
         "org.json4s"   %% "json4s-jackson" % "3.3.0",
         "xerces" % "xercesImpl" % "2.9.1",
         "ca.juliusdavies" % "not-yet-commons-ssl" % "0.3.9",
+        "commons-io" % "commons-io" % "2.5",
         "net.ettinsmoor" % "java-aws-mturk" % "1.6.2" excludeAll(
           ExclusionRule(organization = "org.apache.commons", name = "not-yet-commons-ssl"),
           ExclusionRule(organization = "apache-xerces", name = "resolver"),
@@ -76,9 +80,10 @@ object TurkServiceBuild extends Build {
           ExclusionRule(organization = "apache-xerces", name = "xml-apis")
         )
       ),
+      containerPort in Jetty := 41012,
       javaOptions ++= Seq(
         "-Xdebug",
-        "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+        "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5002"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(

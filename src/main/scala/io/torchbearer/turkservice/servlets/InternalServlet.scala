@@ -2,11 +2,12 @@ package io.torchbearer.turkservice.servlets
 
 import io.torchbearer.ServiceCore.DataModel.ExecutionPoint
 import io.torchbearer.ServiceCore.TorchbearerDB._
-import io.torchbearer.turkservice.{HitService, TurkServiceStack}
+import io.torchbearer.turkservice.{HitService, TurkClientFactory, TurkServiceStack}
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.{Accepted, AsyncResult, ErrorHandler, FutureSupport}
+import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
-import akka.actor.ActorSystem
+import _root_.akka.actor.ActorSystem
+import com.amazonaws.mturk.requester.{EventType, NotificationSpecification, NotificationTransport}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,19 +22,15 @@ class InternalServlet(system: ActorSystem) extends TurkServiceStack with Jackson
     contentType = formats("json")
   }
 
-  post("/process/executionpoint") {
-    val pointIds = (parsedBody \ "executionPoints").extract[List[Int]]
+  post("/sendtestnotification") {
+    //Future {
+      val turkClient = TurkClientFactory.getClient
+      val notification = new NotificationSpecification("https://sqs.us-west-2.amazonaws.com/814009652816/completed-hits",
+        NotificationTransport.SQS, "2006-05-05", Array(EventType.HITReviewable))
+      turkClient.sendTestEventNotification(notification, EventType.HITReviewable)
+    //}
 
-    // If the list is empty, return an error
-    if (pointIds.isEmpty) {
-      halt(409, "No execution point Ids provided")
-    }
-
-    Future {
-        HitService.processExecutionPoints(pointIds)
-    }
-
-    Accepted()
+    //Ok()
   }
 
   override def error(handler: ErrorHandler): Unit = ???
